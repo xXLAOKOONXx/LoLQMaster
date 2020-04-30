@@ -40,9 +40,9 @@ private static void GetAuth(out string Port, out string Token)
 ```
 
 ## Get Requests
-To send a Get request you need to send a GET request towards 127.0.0.1:<PORT>/<API> with a basic authentication (username: "riot", password: "<TOKEN>")
+To send a Get request you need to send a GET request towards 127.0.0.1:PORT/API with a basic authentication (username: "riot", password: "TOKEN")
 PORT and TOKEN therefore need to be recieved as mentioned in Connection Information.
-To find out the API there are a couple of methods. Using 127.0.0.1:<PORT>/help you will get a json response listing all connections. The HTTP requests start with their method (eg `GET`), the and the API listeners start with `OnJsonApiEvent`. The uri path that u need is not explicit mentioned there, but you can build it up yourself (uppercase => lowercase and / or - before).
+To find out the API there are a couple of methods. Using 127.0.0.1:PORT/help you will get a json response listing all connections. The HTTP requests start with their method (eg `GET`), the and the API listeners start with `OnJsonApiEvent`. The uri path that u need is not explicit mentioned there, but you can build it up yourself (uppercase => lowercase and / or - before).
 A much more convenient method is using https://github.com/Pupix/rift-explorer .
 Some APIs might need additional information eather in the body, as parameter or in the url itself.
 Trial and error works here pretty good to figure that out.
@@ -80,7 +80,7 @@ Code to open a connection:
 
 ```
 Once the connection is established you can add endpoints to listen to.
-To get a full List of those events using 127.0.0.1:<PORT>/help is really helpful, as you can identify the events by the prefix `OnJsonApiEvent` and use can use the second half of the method as event path.
+To get a full List of those events using 127.0.0.1:PORT/help is really helpful, as you can identify the events by the prefix `OnJsonApiEvent` and use can use the second half of the method as event path.
 For example the method `OnJsonApiEvent_lol-lobby_v1_lobby` is an event you can listen to on the partial uri `lol-lobby_v1_lobby`.
 To subscribe to such an event you  need to send a request to LCU as the following:
 ```C#
