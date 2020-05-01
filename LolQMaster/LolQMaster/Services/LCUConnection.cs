@@ -19,7 +19,20 @@ namespace LolQMaster.Services
 {
     public class LCUConnection : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #region ValueHolders for Notify Properties
         private string _connectionMessage;
+        private int _currentSummonerIconId;
+        private string _currentSummonerName;
+        private string _currentSummonerId;
+        private string _currentSummonerClubTag;
+        #endregion
+        #region Public interfaces for Notify Properties
+        /// <summary>
+        /// Message giving information about connection status.
+        /// Message is phrased for users.
+        /// </summary>
         public string ConnectionMessage
         {
             get
@@ -32,34 +45,9 @@ namespace LolQMaster.Services
                 NotifyPropertyChanged();
             }
         }
-
-        private int _currentSummonerIconId;
-        private string _currentSummonerName;
-        private string _currentSummonerId;
-        private string _currentSummonerClubTag;
-
-        private string _apiDomain;
-        private AuthenticationHeaderValue _authHeader;
-        private string _token;
-        private string _port;
-
-        private WebSocket _webSocket;
-        private IconManager _iconManager;
-        private const string SummonerIconChangedEvent = "OnJsonApiEvent_lol-summoner_v1_current-summoner";
-        private const string LoggedInEvent = "OnJsonApiEvent_lol-login_v1_login-data-packet";
-        private const string QueueUpEvent = "OnJsonApiEvent_lol-lobby-team-builder_v1_lobby";
-        private const string LobbyChangedEvent = "OnJsonApiEvent_lol-lobby_v2_lobby";
-        private const string GameEvent = "OnJsonApiEvent_lol-gameflow_v1_session";
-
-        static readonly string _authRegexPattern = @"""--remoting-auth-token=(?'token'.*?)"" | ""--app-port=(?'port'|.*?)""";
-        static readonly RegexOptions _authRegexOptions = RegexOptions.Multiline;
-
-        public EventHandler<MessageEventArgs> WebsocketMessageEventHandler { get; private set; }
-        public EventHandler<JArray> SummonerIconChangedEventHandler { get; private set; }
-        public EventHandler<JArray> LoggedInEventHandler { get; private set; }
-        public EventHandler<JArray> QueueUpEventHandler { get; private set; }
-        public EventHandler<JArray> LobbyChangedEventHandler { get; private set; }
-        public EventHandler<JArray> GameFlowSessionEventHandler { get; private set; }
+        /// <summary>
+        /// ID of the summoner icon the current summoner has equiped
+        /// </summary>
         public int CurrentSummonerIconId
         {
             get => _currentSummonerIconId; internal set
@@ -68,6 +56,9 @@ namespace LolQMaster.Services
                 NotifyPropertyChanged();
             }
         }
+        /// <summary>
+        /// Display summoner name of the current summoner
+        /// </summary>
         public string CurrentSummonerName
         {
             get => _currentSummonerName; internal set
@@ -76,6 +67,9 @@ namespace LolQMaster.Services
                 NotifyPropertyChanged();
             }
         }
+        /// <summary>
+        /// Summoner id of the current summoner. Used internally in <see cref="LCUConnection"/>
+        /// </summary>
         public string CurrentSummonerId
         {
             get => _currentSummonerId; internal set
@@ -84,6 +78,10 @@ namespace LolQMaster.Services
                 NotifyPropertyChanged();
             }
         }
+        /// <summary>
+        /// Club tag currently equipped from current summoner.
+        /// !IMPORTANT! !NOT IMPLEMENTED YET!
+        /// </summary>
         public string CurrentSummonerClubTag
         {
             get => _currentSummonerClubTag; internal set
@@ -92,7 +90,44 @@ namespace LolQMaster.Services
                 NotifyPropertyChanged();
             }
         }
+        #endregion
+        #region private constants
+        private const string SummonerIconChangedEvent = "OnJsonApiEvent_lol-summoner_v1_current-summoner";
+        private const string LoggedInEvent = "OnJsonApiEvent_lol-login_v1_login-data-packet";
+        private const string QueueUpEvent = "OnJsonApiEvent_lol-lobby-team-builder_v1_lobby";
+        private const string LobbyChangedEvent = "OnJsonApiEvent_lol-lobby_v2_lobby";
+        private const string GameEvent = "OnJsonApiEvent_lol-gameflow_v1_session";
 
+        static readonly string _authRegexPattern = @"""--remoting-auth-token=(?'token'.*?)"" | ""--app-port=(?'port'|.*?)""";
+        static readonly RegexOptions _authRegexOptions = RegexOptions.Multiline;
+        #endregion
+        #region private properties
+        private bool _connected = false;
+        private bool _terminationRequested = false;
+        private string _apiDomain;
+        private AuthenticationHeaderValue _authHeader;
+        private string _token;
+        private string _port;
+
+        private WebSocket _webSocket;
+        private IconManager _iconManager;
+        #endregion
+        #region EventHandler
+        public EventHandler<MessageEventArgs> WebsocketMessageEventHandler { get; private set; }
+        public EventHandler<JArray> SummonerIconChangedEventHandler { get; private set; }
+        public EventHandler<JArray> LoggedInEventHandler { get; private set; }
+        public EventHandler<JArray> QueueUpEventHandler { get; private set; }
+        public EventHandler<JArray> LobbyChangedEventHandler { get; private set; }
+        public EventHandler<JArray> GameFlowSessionEventHandler { get; private set; }
+        #endregion
+
+        #region public methods
+        /// <summary>
+        /// Creates a new instance of <see cref="LCUConnection"/>.
+        /// The connection is created asynchronously.
+        /// Check out the public properties for more information.
+        /// </summary>
+        /// <param name="iconManager"><see cref="IconManager"/> that is used to update the summoner icon</param>
         public LCUConnection(IconManager iconManager)
         {
             Init(iconManager);
@@ -101,23 +136,73 @@ namespace LolQMaster.Services
 
             SetUpEverything();
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns><see cref="IEnumerable{int}"/> with all summoner icons the current summoner owns in his/her collection.</returns>
+        /// <exception cref="NoConnectionException">Throws exception when no connection to league client available. Check out .Message property for a user friendly explaination</exception>
+        public IEnumerable<int> OwnedIcons()
+        {
+            if (!_connected)
+            {
+                throw new NoConnectionException("No connection to League Client!\nYour icons can not get loaded.");
+            }
 
-        private bool _connected = false;
+            List<int> icons = new List<int>();
+
+            string URL = String.Format("/lol-collections/v2/inventories/{0}/summoner-icons", CurrentSummonerId);
+
+            string response = SendRequest(URL);
+
+            var jArray = JObject.Parse(response);
+
+            var iconArr = jArray["icons"];
+
+            yield return -1; // for no change;
+
+            foreach (var icon in iconArr)
+            {
+                yield return int.Parse(icon.ToString());
+            }
+
+            // /lol-summoner/v1/current-summoner
+
+            // /lol-collections/v2/inventories/{summonerId}/summoner-icons
+
+        }
+
+        /// <summary>
+        /// Closes the webSocket and denies any tries to open a new socket.
+        /// Once terminated the <see cref="LCUConnection"/> can not be restarted, but already gathered information that is stored in properties will remain.
+        /// </summary>
+        /// <param name="sender">no relevance for execution</param>
+        /// <param name="e">no relevance for execution</param>
+        public void Terminate(object sender = null, EventArgs e = null)
+        {
+            _terminationRequested = true;
+
+            if (_webSocket != null)
+            {
+                _webSocket.Close();
+            }
+        }
+
+        #endregion
+
+        #region private methods
+
 
         private async Task SetUpEverything()
         {
             while (!_connected)
             {
-                if (_terminationRequested)
-                {
-                    return;
-                }
                 this.ConnectionMessage = "Connecting to League Client...";
                 try
                 {
                     SetUpConnection();
                     _connected = true;
-                    _webSocket.OnClose += OnWebSocketError;
+                    _webSocket.OnClose += OnWebSocketClose;
                 }
                 catch (Exception ex)
                 {
@@ -128,6 +213,14 @@ namespace LolQMaster.Services
                 {
                     await Task.Delay(15000);
 
+                }
+                if (_terminationRequested)
+                {
+                    if(_webSocket != null && _webSocket.ReadyState == WebSocketState.Connecting || _webSocket.ReadyState == WebSocketState.Open)
+                    {
+                        _webSocket.Close();
+                    }
+                    return;
                 }
             }
 
@@ -143,12 +236,13 @@ namespace LolQMaster.Services
             ConnectionMessage = "Connected with League Client.";
         }
 
-        private async void OnWebSocketError(object sender, EventArgs e)
+        private async void OnWebSocketClose(object sender, EventArgs e)
         {
+            _connected = false;
+
             if (!_terminationRequested)
             {
                 _webSocket = null;
-                _connected = false;
 
                 ConnectionMessage = "Connection to League Client stopped.\nTry to reconnect in 15 seconds.";
 
@@ -292,7 +386,7 @@ namespace LolQMaster.Services
             this.ChangeToQueueIcon(queueId);
         }
 
-        public void SetUpConnection()
+        private void SetUpConnection()
         {
             string port;
             string token;
@@ -362,36 +456,6 @@ namespace LolQMaster.Services
 
         }
 
-        public IEnumerable<int> OwnedIcons()
-        {
-            if (!_connected)
-            {
-                throw new NoConnectionException("No connection to League Client!\nYour icons can not get loaded.");
-            }
-
-            List<int> icons = new List<int>();
-
-            string URL = String.Format("/lol-collections/v2/inventories/{0}/summoner-icons", CurrentSummonerId);
-
-            string response = SendRequest(URL);
-
-            var jArray = JObject.Parse(response);
-
-            var iconArr = jArray["icons"];
-
-            yield return -1; // for no change;
-
-            foreach (var icon in iconArr)
-            {
-                yield return int.Parse(icon.ToString());
-            }
-
-            // /lol-summoner/v1/current-summoner
-
-            // /lol-collections/v2/inventories/{summonerId}/summoner-icons
-
-        }
-
 
         private string SendRequest(string partialUrl, object jsonBody = null)
         {
@@ -411,7 +475,7 @@ namespace LolQMaster.Services
             return res.Content;
         }
 
-        public void UpdateSummonerInformation(JToken jToken)
+        private void UpdateSummonerInformation(JToken jToken)
         {
             try
             {
@@ -424,7 +488,7 @@ namespace LolQMaster.Services
 
             }
         }
-        public void UpdateSummonerInformation()
+        private void UpdateSummonerInformation()
         {
             string partialUrl = "/lol-summoner/v1/current-summoner";
             string body = "";
@@ -447,12 +511,11 @@ namespace LolQMaster.Services
             this.CurrentSummonerName = jArray["displayName"].ToString();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
 
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
         // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -460,20 +523,17 @@ namespace LolQMaster.Services
             }
         }
 
-        private bool _terminationRequested = false;
+        #endregion
 
-        public void Terminate(object sender, EventArgs e)
-        {
-            _terminationRequested = true;
-
-            if (_webSocket != null)
-            {
-                _webSocket.Close();
-            }
-        }
-
+        /// <summary>
+        /// This exception gets thrown when no connection to the League Client is possible.
+        /// </summary>
         public class NoConnectionException : Exception
         {
+            /// <summary>
+            /// Creates a new instance of <see cref="NoConnectionException"/>.
+            /// </summary>
+            /// <param name="message">Message to display to the user</param>
             public NoConnectionException(string message) :
                 base(message)
             {

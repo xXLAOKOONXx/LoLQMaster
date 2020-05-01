@@ -11,7 +11,10 @@ namespace LolQMaster.Services
 {
     public static class StaticApiConnection
     {
+        #region RiotSharp
+
         private static ICache _cache = new Cache();
+        private static StaticDataEndpoints _staticDataEndpoints;
 
         public static StaticDataEndpoints StaticDataEndpoints
         {
@@ -26,15 +29,20 @@ namespace LolQMaster.Services
             }
         }
 
+        #endregion
 
-        private static StaticDataEndpoints _staticDataEndpoints;
 
+        /// <summary>
+        /// Provides an imgurl for <paramref name="iconId"/>
+        /// </summary>
+        /// <param name="iconId">Id of summoner icon</param>
+        /// <returns>imgurl of summoner id. For iconid "-1" returns Zac passive</returns>
         public static string GetSummonerIconImageUrl(int iconId)
         {
 
             var curversion = StaticDataEndpoints.Versions.GetAllAsync().Result.First();
 
-            if(iconId == -1)
+            if (iconId == -1)
             {
                 return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/passive/ZacPassive.png", curversion);
             }
@@ -44,6 +52,11 @@ namespace LolQMaster.Services
             return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/profileicon/{1}.png", curversion, iconId.ToString());
         }
 
+        /// <summary>
+        /// Provides the name of a <paramref name="queueId"/> based on a static manually maintained list
+        /// </summary>
+        /// <param name="queueId">Id of the queue</param>
+        /// <returns>Name of Queue</returns>
         public static string GetQueueName(int queueId)
         {
             var curversion = StaticDataEndpoints.Versions.GetAllAsync().Result.First();
@@ -57,6 +70,10 @@ namespace LolQMaster.Services
             return queueName;
         }
 
+        /// <summary>
+        /// Provides an <see cref="IEnumerable{int}"/> with all queue ids.
+        /// This list is maintained manually in the code behind.
+        /// </summary>
         public static IEnumerable<int> AvailableQueues => _queueDict.Keys;
 
         private static Dictionary<int, string> _queueDict = new Dictionary<int, string>() {
@@ -66,12 +83,12 @@ namespace LolQMaster.Services
             {400, "5v5 Draft Pick" },
             {420, "5v5 Solo/Duo" },
             {430, "5v5 Blind Normal" },
-            { 440, "5v5 Ranked Flex" },
-            { 450, "ARAM" },
+            {440, "5v5 Ranked Flex" },
+            {450, "ARAM" },
             {700,"Clash" },
             {900,"URF" },
             {920,"Legend of the Poro King" },
-            { 1010, "Snow ARURF" },
+            {1010, "Snow ARURF" },
             {1020,"One for All" }
         };
     }
