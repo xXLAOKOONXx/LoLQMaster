@@ -1,5 +1,5 @@
 # Include RiotSharp as no build version accessable unless you build it yourself
-!localNugetPackages/*
+!localNugetPackages/RiotSharp.4.0.0.nupkg
 
 
 ## Ignore Visual Studio temporary files, build results, and
