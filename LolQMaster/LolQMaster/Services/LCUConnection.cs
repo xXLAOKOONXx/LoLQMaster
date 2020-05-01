@@ -102,6 +102,7 @@ namespace LolQMaster.Services
         {
             try
             {
+
                 var qid = int.Parse(e[2]["data"]["gameData"]["queue"]["id"].ToString());
                 ChangeToQueueIcon(qid);
             }catch(Exception ex)
@@ -140,6 +141,10 @@ namespace LolQMaster.Services
         private void ChangeSummonerIcon(int iconId)
         {
             if (iconId == -1)
+            {
+                return;
+            }
+            if(iconId == CurrentSummonerIconId)
             {
                 return;
             }
