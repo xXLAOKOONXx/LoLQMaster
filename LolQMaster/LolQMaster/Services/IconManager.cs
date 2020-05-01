@@ -68,6 +68,12 @@ namespace LolQMaster.Services
 
         public void AddPair(int queue, int summonerIcon)
         {
+            if(summonerIcon == -2)
+            {
+                // -2 is default error answer
+                // -1 stands for do not change icon
+                return;
+            }
             if (_queueSummonericonPairs.ContainsKey(queue))
             {
                 _queueSummonericonPairs.Remove(queue);

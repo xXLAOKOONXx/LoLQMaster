@@ -20,6 +20,7 @@ namespace LolQMaster.Windows
     /// </summary>
     public partial class AddQueue : Window
     {
+        private bool _manualClose = true;
         private LCUConnection _lCUConnection;
         private Action<int, int> _action;
         public AddQueue(IconManager iconManager, LCUConnection lCUConnection, Action<int,int> action)
@@ -28,6 +29,8 @@ namespace LolQMaster.Windows
 
             _lCUConnection = lCUConnection;
             _action = action;
+
+            this.Closing += OnWindowClosing;
 
             SummonerIconSelected(-1);
 
@@ -44,7 +47,7 @@ namespace LolQMaster.Windows
             if (availableQList.Count == 0)
             {
                 var msgbx = MessageBox.Show("Check your settings list, you already have every available queue in your list.");
-
+                _manualClose = false;
                 this.Close();
 
                 return;
@@ -97,10 +100,16 @@ namespace LolQMaster.Windows
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            IconPicker iconPicker;
 
-            var Iconpicker = new IconPicker(_lCUConnection, SummonerIconSelected);
-
-            Iconpicker.Show();
+            try
+            {
+                iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
+            }catch(LCUConnection.NoConnectionException ncex)
+            {
+                MessageBox.Show(ncex.Message);
+                return;
+            }
 
             this.IsEnabled = false;
 
@@ -138,6 +147,12 @@ namespace LolQMaster.Windows
             _action(this.selectedQueue, this._iconId);
 
             this.Close();
+        }
+
+        private void OnWindowClosing(object sender, EventArgs e)
+        {
+            if (_manualClose)
+                _action(-1,-2);
         }
     }
 }

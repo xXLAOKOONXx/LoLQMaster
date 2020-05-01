@@ -42,6 +42,8 @@ namespace LolQMaster
         {
             InitializeComponent();
 
+            App.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
             DrawUISettings();
 
             _iconManager = new IconManager();
@@ -92,6 +94,10 @@ namespace LolQMaster
                     SummonerIconChanged();
                 }
             };
+
+            Binding ConnectionMessageBinding = new Binding("ConnectionMessage");
+            ConnectionMessageBinding.Source = _lCUConnection;
+            this.ClientStatus.SetBinding(Label.ContentProperty, ConnectionMessageBinding);
         }
 
         public void SummonerIconChanged()
@@ -199,10 +205,18 @@ namespace LolQMaster
         private void ChangeSummonerIcon(Setting setting)
         {
             _curChangingSetting = setting;
+            IconPicker iconPicker;
+            try
+            {
+            iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
 
-            var Iconpicker = new IconPicker(_lCUConnection, SummonerIconSelected);
+            }catch(LCUConnection.NoConnectionException ncex)
+            {
+                MessageBox.Show(ncex.Message);
+                return;
+            }
 
-            Iconpicker.Show();
+            iconPicker.Show();
 
             this.IsEnabled = false;
         }

@@ -20,6 +20,7 @@ namespace LolQMaster.Windows
     /// </summary>
     public partial class IconPicker : Window
     {
+        private bool _manualClose = true;
         private LCUConnection _lCUConnection;
         private Action<int> _actionOnIconSelected;
 
@@ -30,10 +31,18 @@ namespace LolQMaster.Windows
             _lCUConnection = lCUConnection;
             _actionOnIconSelected = actionOnIconSelected;
 
+            this.Closing += OnWindowClosing;
+
             foreach (var item in _lCUConnection.OwnedIcons())
             {
                 this.ContentPanel.Children.Add(ClickableImage(item));
             }
+        }
+
+        private void OnWindowClosing(object sender, EventArgs e)
+        {
+            if(_manualClose)
+                _actionOnIconSelected(-2);
         }
 
         private Image DrawImage(int iconId)
@@ -75,6 +84,8 @@ namespace LolQMaster.Windows
 
         private void CloseThis()
         {
+            _manualClose = false;
+
             this.Close();
         }
     }

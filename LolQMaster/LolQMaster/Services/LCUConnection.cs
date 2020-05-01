@@ -19,6 +19,20 @@ namespace LolQMaster.Services
 {
     public class LCUConnection : INotifyPropertyChanged
     {
+        private string _connectionMessage;
+        public string ConnectionMessage
+        {
+            get
+            {
+                return _connectionMessage;
+            }
+            internal set
+            {
+                _connectionMessage = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private int _currentSummonerIconId;
         private string _currentSummonerName;
         private string _currentSummonerId;
@@ -82,9 +96,66 @@ namespace LolQMaster.Services
         public LCUConnection(IconManager iconManager)
         {
             Init(iconManager);
-            SetUpConnection();
 
-            UpdateSummonerInformation();
+            App.Current.Exit += Terminate;
+
+            SetUpEverything();
+        }
+
+        private bool _connected = false;
+
+        private async Task SetUpEverything()
+        {
+            while (!_connected)
+            {
+                if (_terminationRequested)
+                {
+                    return;
+                }
+                this.ConnectionMessage = "Connecting to League Client...";
+                try
+                {
+                    SetUpConnection();
+                    _connected = true;
+                    _webSocket.OnClose += OnWebSocketError;
+                }
+                catch (Exception ex)
+                {
+                    this.ConnectionMessage = ex.Message;
+                    this.ConnectionMessage = ConnectionMessage + "\nTry again in 15 seconds...";
+                }
+                if (!_connected)
+                {
+                    await Task.Delay(15000);
+
+                }
+            }
+
+            try
+            {
+                UpdateSummonerInformation();
+            }
+            catch (Exception ex)
+            {
+                ConnectionMessage = "Unexpected Error occured";
+            }
+
+            ConnectionMessage = "Connected with League Client.";
+        }
+
+        private async void OnWebSocketError(object sender, EventArgs e)
+        {
+            if (!_terminationRequested)
+            {
+                _webSocket = null;
+                _connected = false;
+
+                ConnectionMessage = "Connection to League Client stopped.\nTry to reconnect in 15 seconds.";
+
+                await Task.Delay(15000);
+
+                await SetUpEverything();
+            }
         }
 
         private void Init(IconManager iconManager)
@@ -105,7 +176,8 @@ namespace LolQMaster.Services
 
                 var qid = int.Parse(e[2]["data"]["gameData"]["queue"]["id"].ToString());
                 ChangeToQueueIcon(qid);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
 
             }
@@ -144,7 +216,7 @@ namespace LolQMaster.Services
             {
                 return;
             }
-            if(iconId == CurrentSummonerIconId)
+            if (iconId == CurrentSummonerIconId)
             {
                 return;
             }
@@ -241,10 +313,10 @@ namespace LolQMaster.Services
             wb.Connect();
 
             wb.Send("[5,\"" + SummonerIconChangedEvent + "\"]");
-           // wb.Send("[5,\"" + QueueUpEvent + "\"]");
-          //  wb.Send("[5,\"" + LobbyChangedEvent + "\"]");
+            // wb.Send("[5,\"" + QueueUpEvent + "\"]");
+            //  wb.Send("[5,\"" + LobbyChangedEvent + "\"]");
             wb.Send("[5,\"" + GameEvent + "\"]");
-          //  wb.Send("[5,\"" + LoggedInEvent + "\"]");
+            wb.Send("[5,\"" + LoggedInEvent + "\"]");
 
             _webSocket = wb;
 
@@ -292,6 +364,11 @@ namespace LolQMaster.Services
 
         public IEnumerable<int> OwnedIcons()
         {
+            if (!_connected)
+            {
+                throw new NoConnectionException("No connection to League Client!\nYour icons can not get loaded.");
+            }
+
             List<int> icons = new List<int>();
 
             string URL = String.Format("/lol-collections/v2/inventories/{0}/summoner-icons", CurrentSummonerId);
@@ -336,9 +413,16 @@ namespace LolQMaster.Services
 
         public void UpdateSummonerInformation(JToken jToken)
         {
-            this.CurrentSummonerIconId = int.Parse(jToken["profileIconId"].ToString());
-            this.CurrentSummonerId = jToken["summonerId"].ToString();
-            this.CurrentSummonerName = jToken["displayName"].ToString();
+            try
+            {
+                this.CurrentSummonerIconId = int.Parse(jToken["profileIconId"].ToString());
+                this.CurrentSummonerId = jToken["summonerId"].ToString();
+                this.CurrentSummonerName = jToken["displayName"].ToString();
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
         public void UpdateSummonerInformation()
         {
@@ -373,6 +457,27 @@ namespace LolQMaster.Services
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private bool _terminationRequested = false;
+
+        public void Terminate(object sender, EventArgs e)
+        {
+            _terminationRequested = true;
+
+            if (_webSocket != null)
+            {
+                _webSocket.Close();
+            }
+        }
+
+        public class NoConnectionException : Exception
+        {
+            public NoConnectionException(string message) :
+                base(message)
+            {
+
             }
         }
     }
