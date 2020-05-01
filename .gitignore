@@ -1,5 +1,3 @@
-# Include RiotSharp as no build version accessable unless you build it yourself
-!localNugetPackages/RiotSharp.4.0.0.nupkg
 
 
 ## Ignore Visual Studio temporary files, build results, and
@@ -263,3 +261,6 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Include RiotSharp as no build version accessable unless you build it yourself
+!localNugetPackages/RiotSharp.4.0.0.nupkg
