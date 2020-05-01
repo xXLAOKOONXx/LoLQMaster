@@ -137,6 +137,8 @@ namespace LolQMaster.Windows
             try
             {
                 iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
+
+                iconPicker.Show();
             }catch(LCUConnection.NoConnectionException ncex)
             {
                 MessageBox.Show(ncex.Message);
