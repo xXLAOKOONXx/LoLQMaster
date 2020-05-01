@@ -55,3 +55,9 @@ Have Fun!
   - OnJsonApiEvent_lol-summoner_v1_current-summoner
   - OnJsonApiEvent_lol-login_v1_login-data-packet
   - OnJsonApiEvent_lol-gameflow_v1_session
+## Thanks
+Thanks for the following open project as they helped my understand how to enable the LCU APIs.
+- [PoroQueue](https://github.com/Querijn/PoroQueue)
+- [lolav](https://github.com/PixelHir/lolav)
+- [RiftExplorer](https://github.com/Pupix/rift-explorer)  
+Additionally thanks to [RiotSharp](https://github.com/BenFradet/RiotSharp) bringing me to experimenting with Riots open APIs.
