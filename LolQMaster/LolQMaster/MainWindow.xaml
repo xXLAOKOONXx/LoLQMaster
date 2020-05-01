@@ -1,0 +1,34 @@
+﻿<Window x:Class="LolQMaster.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LolQMaster"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Name="LeftPanel" Grid.Column="0" Orientation="Vertical">
+            <Image Name="IMGCurrentSummonerIcon" Width="150px" Height="150px" Margin="5,5,5,5"/>
+            <Label Name="LBLSummonerName" HorizontalAlignment="Center" Content="SummonerName" FontSize="20"/>
+            <Label Name="LBLSummonerClubTag" HorizontalAlignment="Center" Content="ClubTAG"/>
+            <StackPanel Name="ClientUpdateFrame">
+                <Label Name="ClientStatus" />
+            </StackPanel>
+        </StackPanel>
+        <ScrollViewer Grid.Column="1">            
+        <StackPanel>
+
+            <StackPanel Name="SettingsPanel">
+
+            </StackPanel>
+            <Button Name="BTNAddQueue" Content="Add Queue" Click="BTNAddQueue_Click" FontSize="20" FontWeight="Bold"/>
+
+        </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

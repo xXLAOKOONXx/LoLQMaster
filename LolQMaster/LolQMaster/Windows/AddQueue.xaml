@@ -1,0 +1,23 @@
+﻿<Window x:Class="LolQMaster.Windows.AddQueue"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LolQMaster.Windows"
+        mc:Ignorable="d"
+        Title="AddQueue" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="0">
+            <StackPanel Name="QueuePicker">
+
+            </StackPanel>
+        </ScrollViewer>
+        <Image Name="IMGSummonerIcon" Grid.Column="1" Width="150" Height="150" Margin="123,36,123,234"/>
+        <Button Grid.Column="1" Width="150" Height="30" Content="Pick Icon" Margin="123.2,191,123.6,199" Click="Button_Click"/>
+        <Button Name="BTNAddQueue" Grid.Column="1" Height="30" Content="Add Queue and Icon" Margin="227.2,351,33.6,39" Click="BTNAddQueue_Click"/>
+    </Grid>
+</Window>
