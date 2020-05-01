@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using LolQMaster.Services;
+using Newtonsoft.Json.Linq;
 
 namespace LolQMaster.Windows
 {
@@ -37,6 +38,20 @@ namespace LolQMaster.Windows
             {
                 this.ContentPanel.Children.Add(ClickableImage(item));
             }
+        }
+
+        private JToken _uISettings;
+        private void DrawUISettings()
+        {
+            var filePath = System.IO.Path.Combine(AppContext.BaseDirectory, "Settings", "UISettings.json");
+
+            var jsontext = System.IO.File.ReadAllText(filePath);
+
+            var uISettings = JObject.Parse(jsontext);
+
+            _uISettings = uISettings["IconPicker"];
+
+            this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["BackgroundColor"].ToString()));
         }
 
         private void OnWindowClosing(object sender, EventArgs e)

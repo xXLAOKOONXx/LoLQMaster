@@ -17,7 +17,7 @@
             </StackPanel>
         </ScrollViewer>
         <Image Name="IMGSummonerIcon" Grid.Column="1" Width="150" Height="150" Margin="123,36,123,234"/>
-        <Button Grid.Column="1" Width="150" Height="30" Content="Pick Icon" Margin="123.2,191,123.6,199" Click="Button_Click"/>
-        <Button Name="BTNAddQueue" Grid.Column="1" Height="30" Content="Add Queue and Icon" Margin="227.2,351,33.6,39" Click="BTNAddQueue_Click"/>
+        <Button Name="BTNPickIcon" Grid.Column="1" Content="Pick Icon" Margin="123.2,191,123.6,194" Click="Button_Click"/>
+        <Button Name="BTNAddQueue" Grid.Column="1" Content="Add Queue and Icon" Margin="227.2,351,35.6,34" Click="BTNAddQueue_Click"/>
     </Grid>
 </Window>

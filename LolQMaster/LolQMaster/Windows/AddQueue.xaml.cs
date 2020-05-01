@@ -1,4 +1,5 @@
 ﻿using LolQMaster.Services;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,8 @@ namespace LolQMaster.Windows
 
             SummonerIconSelected(-1);
 
+            DrawUISettings();
+
             var availableQList = StaticApiConnection.AvailableQueues.ToList();
 
             foreach (var q in iconManager.QueueSummonerIcons)
@@ -62,6 +65,24 @@ namespace LolQMaster.Windows
             RadioButtonClicked.Invoke(null, availableQList.First());
         }
 
+        private JToken _uISettings;
+        private void DrawUISettings()
+        {
+            var filePath = System.IO.Path.Combine(AppContext.BaseDirectory, "Settings", "UISettings.json");
+
+            var jsontext = System.IO.File.ReadAllText(filePath);
+
+            var uISettings = JObject.Parse(jsontext);
+
+            _uISettings = uISettings["AddQueue"];
+
+            this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["BackgroundColor"].ToString()));
+
+            this.BTNAddQueue.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["BTNAddQueueBackgroundColor"].ToString()));
+
+            this.BTNPickIcon.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["BTNPickIconBackgroundColor"].ToString()));
+        }
+
         private int selectedQueue;
 
         private EventHandler<int> RadioButtonClicked;
@@ -69,8 +90,11 @@ namespace LolQMaster.Windows
         private UIElement PickerOption(int queueId)
         {
             var horistack = new StackPanel();
+            horistack.Margin = new Thickness(5, 5, 5, 5);
             horistack.Orientation = Orientation.Horizontal;
             var radio = new RadioButton();
+            radio.Padding = new Thickness(10);
+            radio.VerticalAlignment = VerticalAlignment.Center;
             radio.Click += (sender, e) =>
             {
                 selectedQueue = queueId;
@@ -80,6 +104,14 @@ namespace LolQMaster.Windows
 
             var lbl = new Label();
             lbl.Content = StaticApiConnection.GetQueueName(queueId);
+            lbl.VerticalAlignment = VerticalAlignment.Center;
+            lbl.Width = 150;
+            lbl.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["LBLQueueBackgroundColor"].ToString()));
+            lbl.MouseDown += (sender, e) =>
+            {
+                selectedQueue = queueId;
+                RadioButtonClicked.Invoke(sender, queueId);
+            };
 
             horistack.Children.Add(radio);
             horistack.Children.Add(lbl);
