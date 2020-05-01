@@ -17,7 +17,7 @@ using RestSharp.Authenticators;
 
 namespace LolQMaster.Services
 {
-    public class LCUConnection: INotifyPropertyChanged
+    public class LCUConnection : INotifyPropertyChanged
     {
         private int _currentSummonerIconId;
         private string _currentSummonerName;
@@ -100,7 +100,14 @@ namespace LolQMaster.Services
 
         private void OnGameFlowSessionChanged(object sender, JArray e)
         {
-            DoLobbyStuff();
+            try
+            {
+                var qid = int.Parse(e[2]["data"]["gameData"]["queue"]["id"].ToString());
+                ChangeToQueueIcon(qid);
+            }catch(Exception ex)
+            {
+
+            }
         }
 
         private void OnLobbyChanged(object sender, JArray e)
@@ -120,7 +127,7 @@ namespace LolQMaster.Services
 
         private void OnSummonerIconChanged(object sender, JArray e)
         {
-            UpdateSummonerInformation();
+            UpdateSummonerInformation(e[2]["data"]);
         }
 
         private void ChangeToQueueIcon(int queue)
@@ -132,7 +139,7 @@ namespace LolQMaster.Services
 
         private void ChangeSummonerIcon(int iconId)
         {
-            if(iconId == -1)
+            if (iconId == -1)
             {
                 return;
             }
@@ -166,19 +173,21 @@ namespace LolQMaster.Services
 
             var EventName = Messages[1].ToString();
 
+            Console.WriteLine("Event: " + EventName + " uri " + Messages[2]["uri"]);
+
             switch (EventName)
             {
                 case SummonerIconChangedEvent:
                     SummonerIconChangedEventHandler.Invoke(sender, Messages);
                     break;
                 case LoggedInEvent:
-                    LoggedInEventHandler.Invoke(sender, Messages);
+                    //LoggedInEventHandler.Invoke(sender, Messages);
                     break;
                 case QueueUpEvent:
-                    QueueUpEventHandler.Invoke(sender, Messages);
+                    //QueueUpEventHandler.Invoke(sender, Messages);
                     break;
                 case LobbyChangedEvent:
-                    LobbyChangedEventHandler.Invoke(sender, Messages);
+                    //LobbyChangedEventHandler.Invoke(sender, Messages);
                     break;
                 case GameEvent:
                     GameFlowSessionEventHandler.Invoke(sender, Messages);
@@ -192,13 +201,14 @@ namespace LolQMaster.Services
         {
             int queueId = -1;
 
-                var resp = SendRequest("/lol-lobby/v2/lobby");
+            var resp = SendRequest("/lol-lobby/v2/lobby");
 
             try
             {
                 var jArray = JObject.Parse(resp);
                 queueId = int.Parse(jArray["gameConfig"]["queueId"].ToString());
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
 
             }
@@ -226,10 +236,10 @@ namespace LolQMaster.Services
             wb.Connect();
 
             wb.Send("[5,\"" + SummonerIconChangedEvent + "\"]");
-            wb.Send("[5,\"" + QueueUpEvent + "\"]");
-            wb.Send("[5,\"" + LobbyChangedEvent + "\"]");
+           // wb.Send("[5,\"" + QueueUpEvent + "\"]");
+          //  wb.Send("[5,\"" + LobbyChangedEvent + "\"]");
             wb.Send("[5,\"" + GameEvent + "\"]");
-            wb.Send("[5,\"" + LoggedInEvent + "\"]");
+          //  wb.Send("[5,\"" + LoggedInEvent + "\"]");
 
             _webSocket = wb;
 
@@ -272,14 +282,14 @@ namespace LolQMaster.Services
 
             Token = token;
             Port = port;
-            
+
         }
 
         public IEnumerable<int> OwnedIcons()
         {
             List<int> icons = new List<int>();
 
-            string URL = String.Format("/lol-collections/v2/inventories/{0}/summoner-icons",CurrentSummonerId);
+            string URL = String.Format("/lol-collections/v2/inventories/{0}/summoner-icons", CurrentSummonerId);
 
             string response = SendRequest(URL);
 
@@ -289,7 +299,7 @@ namespace LolQMaster.Services
 
             yield return -1; // for no change;
 
-            foreach(var icon in iconArr)
+            foreach (var icon in iconArr)
             {
                 yield return int.Parse(icon.ToString());
             }
@@ -311,7 +321,7 @@ namespace LolQMaster.Services
                 Authenticator = new HttpBasicAuthenticator("riot", _token)
             };
             var req = new RestRequest(partialUrl, Method.GET);
-            if(jsonBody != null)
+            if (jsonBody != null)
             {
                 req.AddJsonBody(new { jsonBody });
             }
@@ -319,49 +329,21 @@ namespace LolQMaster.Services
             return res.Content;
         }
 
+        public void UpdateSummonerInformation(JToken jToken)
+        {
+            this.CurrentSummonerIconId = int.Parse(jToken["profileIconId"].ToString());
+            this.CurrentSummonerId = jToken["summonerId"].ToString();
+            this.CurrentSummonerName = jToken["displayName"].ToString();
+        }
         public void UpdateSummonerInformation()
         {
-
-            List<int> icons = new List<int>();
-
             string partialUrl = "/lol-summoner/v1/current-summoner";
             string body = "";
 
-            // var response = SendRequest(partialUrl);
-            /*
-            HttpClient Client = new HttpClient();
-            StringContent Content = new StringContent(body, System.Text.Encoding.UTF8, "application/json");
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; }; // automatically trust the certificate
-            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            Client.Timeout = new TimeSpan(0, 0, 15);
-            Client.DefaultRequestHeaders.Authorization = _authHeader;
-
-            string response;
-
-            using (Client)
-            {
-                HttpResponseMessage Response = Client.PutAsync(URL, Content).Result;
-                Response.EnsureSuccessStatusCode();
-
-                response = Response.Content.ReadAsStringAsync().Result;
-            }
-            */
-
-            
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             ServicePointManager.ServerCertificateValidationCallback +=
                 (sender, cert, chain, sslPolicyErrors) => { return true; };
-            /*
-            RestClient client = new RestClient(_apiDomain)
-            {
-                Authenticator = new HttpBasicAuthenticator("riot", _token)
-            };
-            var req = new RestRequest("/lol-summoner/v1/current-summoner/icon", Method.PUT);
-            req.AddJsonBody(new { profileIconId = 13 });
-            var res = client.Execute(req);
-            */
-            
-            //TESTEND
+
 
             RestClient restClient = new RestClient(_apiDomain);
             restClient.Authenticator = new HttpBasicAuthenticator("riot", _token);

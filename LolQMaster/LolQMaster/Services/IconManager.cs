@@ -79,11 +79,11 @@ namespace LolQMaster.Services
 
         public int GetQueueValue(int queue)
         {
-            int summonerIcon;
+            int summonerIcon = -1;
             var success = _queueSummonericonPairs.TryGetValue(queue, out summonerIcon);
             if (!success)
             {
-                return -1;
+                _queueSummonericonPairs.TryGetValue(-1, out summonerIcon);
             }
             return summonerIcon;
         }
