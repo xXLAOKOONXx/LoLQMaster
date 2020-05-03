@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using RiotSharp;
@@ -39,17 +41,11 @@ namespace LolQMaster.Services
         /// <returns>imgurl of summoner id. For iconid "-1" returns Zac passive</returns>
         public static string GetSummonerIconImageUrl(int iconId)
         {
-
-            var curversion = StaticDataEndpoints.Versions.GetAllAsync().Result.First();
-
-            if (iconId == -1)
+            while (!File.Exists(LocalIconLocation(iconId)))
             {
-                return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/passive/ZacPassive.png", curversion);
+                Task.Run(()=>CopyToLocal(iconId));
             }
-
-            // Schema: http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/685.png
-
-            return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/profileicon/{1}.png", curversion, iconId.ToString());
+            return LocalIconLocation(iconId);
         }
 
         /// <summary>
@@ -75,6 +71,44 @@ namespace LolQMaster.Services
         /// This list is maintained manually in the code behind.
         /// </summary>
         public static IEnumerable<int> AvailableQueues => _queueDict.Keys;
+
+        private static string IconFolder
+        {
+            get
+            {
+                var iconfolderpath = Path.Combine(AppContext.BaseDirectory, "icons");
+                if (!Directory.Exists(iconfolderpath))
+                {
+                    Directory.CreateDirectory(iconfolderpath);
+                }
+                return iconfolderpath;
+            }
+        }
+        private static void CopyToLocal(int icon)
+        {
+            using (var client = new WebClient())
+            {
+                client.DownloadFile(WebUrl(icon),LocalIconLocation(icon));
+            }
+        }
+
+        private static string WebUrl(int iconId)
+        {
+            var curversion = StaticDataEndpoints.Versions.GetAllAsync().Result.First();
+
+            if (iconId == -1)
+            {
+                return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/passive/ZacPassive.png", curversion);
+            }
+
+            // Schema: http://ddragon.leagueoflegends.com/cdn/10.9.1/img/profileicon/685.png
+
+            return String.Format("http://ddragon.leagueoflegends.com/cdn/{0}/img/profileicon/{1}.png", curversion, iconId.ToString());
+        }
+        private static string LocalIconLocation(int icon)
+        {
+            return Path.Combine(IconFolder, icon + ".png");
+        }
 
         private static Dictionary<int, string> _queueDict = new Dictionary<int, string>() {
             {-1,"Default" },
