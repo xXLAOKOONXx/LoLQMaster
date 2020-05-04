@@ -43,7 +43,7 @@ namespace LolQMaster.Services
         {
             while (!File.Exists(LocalIconLocation(iconId)))
             {
-                Task.Run(()=>CopyToLocal(iconId));
+                CopyToLocal(iconId);
             }
             return LocalIconLocation(iconId);
         }
@@ -88,7 +88,14 @@ namespace LolQMaster.Services
         {
             using (var client = new WebClient())
             {
+                try
+                {
                 client.DownloadFile(WebUrl(icon),LocalIconLocation(icon));
+
+                }catch(WebException ex)
+                {
+
+                }
             }
         }
 
