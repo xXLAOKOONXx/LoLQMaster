@@ -23,6 +23,16 @@ namespace LolQMaster
     /// </summary>
     public partial class MainWindow : Window
     {
+        private void OnSummonerNameChange(object o, System.ComponentModel.PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            if (propertyChangedEventArgs.PropertyName == "CurrentSummonerName")
+            {
+                _iconManager = new IconManager(_lCUConnection.CurrentSummonerName);
+
+                DrawList();
+            }
+        }
+
         private JToken _uISettings;
         private IconManager _iconManager;
         private LCUConnection _lCUConnection;
@@ -75,6 +85,8 @@ namespace LolQMaster
 
         private void InitBindings()
         {
+            _lCUConnection.PropertyChanged += this.OnSummonerNameChange;
+
             Binding myBinding = new Binding("CurrentSummonerName");
             myBinding.Source = _lCUConnection;
             // Bind the new data source to the Lebel control's Content dependency property.
@@ -115,12 +127,16 @@ namespace LolQMaster
         }
         private void DrawList()
         {
-            SettingsPanel.Children.Clear();
-
-            foreach (var item in MagicList)
+            SettingsPanel.Dispatcher.Invoke(() =>
             {
-                SettingsPanel.Children.Add(GetUIElement(item));
-            }
+                SettingsPanel.Children.Clear();
+
+                foreach (var item in MagicList)
+                {
+                    SettingsPanel.Children.Add(GetUIElement(item));
+                }
+            });
+
         }
 
         private UIElement GetUIElement(Setting setting)
@@ -208,9 +224,10 @@ namespace LolQMaster
             IconPicker iconPicker;
             try
             {
-            iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
+                iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
 
-            }catch(LCUConnection.NoConnectionException ncex)
+            }
+            catch (LCUConnection.NoConnectionException ncex)
             {
                 MessageBox.Show(ncex.Message);
                 return;

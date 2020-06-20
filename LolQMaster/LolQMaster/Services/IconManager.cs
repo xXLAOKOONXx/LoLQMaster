@@ -12,14 +12,19 @@ namespace LolQMaster.Services
     public class IconManager
     {
         #region private properties
-        private static string _fileName
+        private string _fileSummonerName = "";
+        private string _fileName
         {
             get
             {
+                if(_fileSummonerName != "")
+                {
+                    return _fileSummonerName + "_iconsettings.lqm";
+                }
                 return "iconsettings.lqm";
             }
         }
-        private static string _settingsPath
+        private string _settingsPath
         {
             get
             {
@@ -65,6 +70,21 @@ namespace LolQMaster.Services
                 _queueSummonericonPairs.Add(-1, -1);
             }
 
+        }
+
+        public IconManager(string summonerName)
+        {
+            this._fileSummonerName = TinySummonerName(summonerName);
+
+            try
+            {
+                ReadSettingsFromFile();
+            }
+            catch (Exception ex)
+            {
+                _queueSummonericonPairs = new Dictionary<int, int>();
+                _queueSummonericonPairs.Add(-1, -1);
+            }
         }
 
         /// <summary>
@@ -146,6 +166,19 @@ namespace LolQMaster.Services
         }
         #endregion
 
+        private string TinySummonerName(string summonerName)
+        {
+            string[] replaceChars = new string[] { " ", "\\" };
+
+            var ret = summonerName;
+
+            foreach(var c in replaceChars)
+            {
+                ret = ret.Replace(c, "");
+            }
+
+            return ret;
+        }
         #endregion
 
 
