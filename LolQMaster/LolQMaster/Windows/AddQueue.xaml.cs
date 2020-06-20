@@ -24,7 +24,7 @@ namespace LolQMaster.Windows
         private bool _manualClose = true;
         private LCUConnection _lCUConnection;
         private Action<int, int> _action;
-        public AddQueue(IconManager iconManager, LCUConnection lCUConnection, Action<int,int> action)
+        public AddQueue(IconManager iconManager, LCUConnection lCUConnection, Action<int, int> action)
         {
             InitializeComponent();
 
@@ -125,7 +125,8 @@ namespace LolQMaster.Windows
         {
             _iconId = iconId;
 
-            this.GetImageFromUrl(iconId, this.IMGSummonerIcon);
+            if (_iconId != -2)
+                this.GetImageFromUrl(iconId, this.IMGSummonerIcon);
 
             this.IsEnabled = true;
         }
@@ -139,7 +140,8 @@ namespace LolQMaster.Windows
                 iconPicker = new IconPicker(_lCUConnection, SummonerIconSelected);
 
                 iconPicker.Show();
-            }catch(LCUConnection.NoConnectionException ncex)
+            }
+            catch (LCUConnection.NoConnectionException ncex)
             {
                 MessageBox.Show(ncex.Message);
                 return;
@@ -186,7 +188,7 @@ namespace LolQMaster.Windows
         private void OnWindowClosing(object sender, EventArgs e)
         {
             if (_manualClose)
-                _action(-1,-2);
+                _action(-1, -2);
         }
     }
 }
