@@ -2,11 +2,13 @@
 Changing league of legends settings based on the queue you are in. (e.g. Poro Icon for Poro King)
 
 ## Disclaimer
-This application is not reviewed by Riot yet and therefore not open for use.  
   
 On the Korean server applications using the LCU Interface are not allowed. As this application uses LCU Interfaces you are not allowed to use the application on Korean server. [Riot Article](https://www.riotgames.com/en/DevRel/changes-to-the-lcu-api-policy)
   
 LolQMaster isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
+
+
+This application is approved by Riot. 
 
 ## User Guide
 
