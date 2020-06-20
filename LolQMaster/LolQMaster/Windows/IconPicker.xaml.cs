@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using LolQMaster.Models;
 using LolQMaster.Services;
 using Newtonsoft.Json.Linq;
 
@@ -21,9 +22,11 @@ namespace LolQMaster.Windows
     /// </summary>
     public partial class IconPicker : Window
     {
+        private const string allIconsFilter = "all";
         private bool _manualClose = true;
         private LCUConnection _lCUConnection;
         private Action<int> _actionOnIconSelected;
+        private IconFilters iconFilters;
 
         public IconPicker(LCUConnection lCUConnection, Action<int> actionOnIconSelected)
         {
@@ -34,9 +37,65 @@ namespace LolQMaster.Windows
 
             this.Closing += OnWindowClosing;
 
-            foreach (var item in _lCUConnection.OwnedIcons())
+            GetIconFilters();
+
+            DrawIcons(allIconsFilter);
+
+            InitFilterButtons();
+
+        }
+        private void InitFilterButtons()
+        {
+            AddFilterButton(allIconsFilter);
+
+            foreach (var filter in iconFilters.Filters)
             {
-                this.ContentPanel.Children.Add(ClickableImage(item));
+                AddFilterButton(filter.FilterName);
+            }
+        }
+
+        private void AddFilterButton(string filtername)
+        {
+            var button = new Button();
+
+            button.Content = filtername;
+
+            button.Click += (o, s) => { DrawIcons(filtername); };
+
+            this.FilterRow.Children.Add(button);
+
+            button.Width = 100;
+        }
+
+        private void DrawIcons(string filterName)
+        {
+            this.ContentPanel.Children.Clear();
+
+            if (filterName == allIconsFilter)
+            {
+                foreach (var item in _lCUConnection.OwnedIcons())
+                {
+                    this.ContentPanel.Children.Add(ClickableImage(item));
+                }
+                return;
+            }
+            try
+            {
+                var filter = this.iconFilters.Filters.Where(x => x.FilterName == filterName).First();
+
+                foreach (var item in _lCUConnection.OwnedIcons())
+                {
+                    if (filter.Icons.Contains(item))
+                    {
+                        this.ContentPanel.Children.Add(ClickableImage(item));
+                    }
+                }
+                return;
+
+            }
+            catch (Exception ex)
+            {
+                DrawIcons(allIconsFilter);
             }
         }
 
@@ -54,28 +113,57 @@ namespace LolQMaster.Windows
             this.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_uISettings["BackgroundColor"].ToString()));
         }
 
+        private void GetIconFilters()
+        {
+
+            var filePath = System.IO.Path.Combine(AppContext.BaseDirectory, "Settings", "IconFilters.json");
+
+            var jsontext = System.IO.File.ReadAllText(filePath);
+
+            var filters = JObject.Parse(jsontext);
+
+            this.iconFilters = new IconFilters();
+
+            foreach (var v in filters)
+            {
+                var filtername = v.Key;
+                var filtervalues = v.Value as JArray;
+                var iconlist = new List<int>();
+                foreach (var item in filtervalues)
+                {
+                    try
+                    {
+                        var id = (int)item;
+                        iconlist.Add(id);
+                    }
+                    catch (Exception ex) { }
+                }
+                iconFilters.AddFilter(new IconFilters.IconFilter(filtername, iconlist));
+            }
+        }
+
         private void OnWindowClosing(object sender, EventArgs e)
         {
-            if(_manualClose)
+            if (_manualClose)
                 _actionOnIconSelected(-2);
         }
 
         private Image DrawImage(int iconId)
         {
-                var image = new Image();
+            var image = new Image();
 
-                string fullFilePath = Services.StaticApiConnection.GetSummonerIconImageUrl(iconId);
+            string fullFilePath = Services.StaticApiConnection.GetSummonerIconImageUrl(iconId);
 
-                BitmapImage bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(fullFilePath, UriKind.Absolute);
-                bitmap.EndInit();
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(fullFilePath, UriKind.Absolute);
+            bitmap.EndInit();
 
-                image.Source = bitmap;
-                {
-                    image.Height = 50;
-                    image.Width = 50;
-                }
+            image.Source = bitmap;
+            {
+                image.Height = 50;
+                image.Width = 50;
+            }
 
             return image;
         }

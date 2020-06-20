@@ -7,10 +7,15 @@
         mc:Ignorable="d"
         Title="LolQMaster - Pick Icon" Height="450" Width="800">
     <Grid>
-        <ScrollViewer>
-            <WrapPanel Name="ContentPanel">
+        <StackPanel Orientation="Vertical">
+            <StackPanel Name="FilterRow" Orientation="Horizontal" Height="30">
                 
-            </WrapPanel>
-        </ScrollViewer>
+            </StackPanel>
+            <ScrollViewer Height="auto">
+                <WrapPanel Name="ContentPanel">
+
+                </WrapPanel>
+            </ScrollViewer>
+        </StackPanel>
     </Grid>
 </Window>
