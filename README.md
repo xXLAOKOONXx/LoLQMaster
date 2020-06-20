@@ -18,25 +18,25 @@ In [Releases](https://github.com/xXLaokoonXx/LoLQMaster/releases "LolQMaster/Rel
 4. The application need to be open and running (as window visible for you) to work. If you close the window all connected services will shut down as well.  
 
 ### Step-by-Step Example
-![Main Window](https://github.com/xXLaokoonXx/LoLQMaster/blob/master/images/UI_MainWindow.png?raw=true "Main Window")
+![Main Window](images/UI_MainWindow.png?raw=true "Main Window")
 On the left side you can see:
 - Your current summoner icon
 - Your summoner name
 - Information about the connection to League Client  
 
 You can click on the different queues to unfold them.
-![Main Window - Extended View](https://github.com/xXLaokoonXx/LoLQMaster/blob/master/images/UI_MainWindow_extendedView.png?raw=true "Main Window - Extended View")
+![Main Window - Extended View](images/UI_MainWindow_extendedView.png?raw=true "Main Window - Extended View")
 There you can either delete the queues (except of default) or change the image.  
 When you click on "Add Queue" you land on another window.
-![Add Queue](https://github.com/xXLaokoonXx/LoLQMaster/blob/master/images/UI_AddQueueWindow.png?raw=true "Add Queue")
+![Add Queue](images/UI_AddQueueWindow.png?raw=true "Add Queue")
 On the left side you can select the Queue you would like to add.  
 On the right side you can select the summoner icon you would like to use.  
 Whether you click on "Pick icon" on this window or you click "Change icon" on the main window you land in the icon picker.
-![Icon Picker](https://github.com/xXLaokoonXx/LoLQMaster/blob/master/images/UI_IconPicker.png?raw=true "Icon Picker")
+![Icon Picker](images/UI_IconPicker.png?raw=true "Icon Picker")
 With a click on the summoner icon of your choice you will get back to your last window.  
   
   
-![Zac Passive](https://github.com/xXLaokoonXx/LoLQMaster/blob/master/images/ZacPassive.png?raw=true "Zac Passive")
+![Zac Passive](images/ZacPassive.png?raw=true "Zac Passive")
 !IMPORTANT! You will notice Zac's passive icon is there as well. Unfortunately you can not have that one as your summoner icon, but instead this icon represents not changing your icon.
   
   
