@@ -90,9 +90,10 @@ namespace LolQMaster.Services
             {
                 try
                 {
-                client.DownloadFile(WebUrl(icon),LocalIconLocation(icon));
+                    client.DownloadFile(WebUrl(icon), LocalIconLocation(icon));
 
-                }catch(WebException ex)
+                }
+                catch (WebException ex)
                 {
 
                 }
@@ -118,7 +119,7 @@ namespace LolQMaster.Services
         }
 
         private static Dictionary<int, string> _queueDict = new Dictionary<int, string>() {
-            {-1,"Default" },
+            {-1, "Default" },
             {0, "Custom games" },
             {325, "All random on Summoners Rift" },
             {400, "5v5 Draft Pick" },
@@ -126,11 +127,13 @@ namespace LolQMaster.Services
             {430, "5v5 Blind Normal" },
             {440, "5v5 Ranked Flex" },
             {450, "ARAM" },
-            {700,"Clash" },
-            {900,"URF" },
-            {920,"Legend of the Poro King" },
+            {700, "Clash" },
+            {900, "URF" },
+            {920, "Legend of the Poro King" },
             {1010, "Snow ARURF" },
-            {1020,"One for All" }
+            {1020, "One for All" },
+            {1090, "TFT Normal" },
+            {1100, "TFT Ranked" }
         };
     }
 }
