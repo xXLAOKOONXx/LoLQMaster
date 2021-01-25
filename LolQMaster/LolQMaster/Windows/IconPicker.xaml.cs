@@ -191,5 +191,33 @@ namespace LolQMaster.Windows
 
             this.Close();
         }
+
+        private void TXTSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var search = ((TextBox)e.Source).Text;
+            DrawIconsBySearch(search);
+        }
+
+        private void DrawIconsBySearch(string searchText)
+        {
+            this.ContentPanel.Children.Clear();
+
+            try
+            {
+                foreach (var item in _lCUConnection.OwnedIcons())
+                {
+                    if (item.ToString().Contains(searchText))
+                    {
+                        this.ContentPanel.Children.Add(ClickableImage(item));
+                    }
+                }
+                return;
+
+            }
+            catch (Exception ex)
+            {
+                DrawIcons(allIconsFilter);
+            }
+        }
     }
 }

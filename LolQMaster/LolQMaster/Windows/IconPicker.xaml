@@ -11,13 +11,18 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-            <StackPanel Name="FilterRow" Orientation="Horizontal" Height="30" Grid.Row="0">
-                
-            </StackPanel>
-            <ScrollViewer Height="auto" Grid.Row="1">
-                <WrapPanel Name="ContentPanel">
+        <StackPanel Name="FilterRow" Orientation="Horizontal" Height="30" Grid.Row="0">
 
-                </WrapPanel>
-            </ScrollViewer>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label Content="ID Search:" Width="auto" FontSize="20"/>
+            <TextBox Name="TXTSearch" TextChanged="TXTSearch_TextChanged" HorizontalAlignment="Right" Width="100" FontSize="20" HorizontalContentAlignment="Right"
+                     Padding="5"/>
+        </StackPanel>
+        <ScrollViewer Height="auto" Grid.Row="1">
+            <WrapPanel Name="ContentPanel">
+
+            </WrapPanel>
+        </ScrollViewer>
     </Grid>
 </Window>
