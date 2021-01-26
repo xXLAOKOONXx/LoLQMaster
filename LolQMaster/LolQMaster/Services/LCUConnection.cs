@@ -91,6 +91,11 @@ namespace LolQMaster.Services
             }
         }
         #endregion
+        public IconManager IconManager
+        {
+            get => _iconManager;
+            set => _iconManager = value;
+        }
         #region private constants
         private const string SummonerIconChangedEvent = "OnJsonApiEvent_lol-summoner_v1_current-summoner";
         private const string LoggedInEvent = "OnJsonApiEvent_lol-login_v1_login-data-packet";

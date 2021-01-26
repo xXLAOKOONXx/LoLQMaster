@@ -28,6 +28,7 @@ namespace LolQMaster
             if (propertyChangedEventArgs.PropertyName == "CurrentSummonerName")
             {
                 _iconManager = new IconManager(_lCUConnection.CurrentSummonerName);
+                _lCUConnection.IconManager = _iconManager;
 
                 DrawList();
             }
@@ -56,10 +57,14 @@ namespace LolQMaster
 
             DrawUISettings();
 
+
             _iconManager = new IconManager();
             _lCUConnection = new LCUConnection(_iconManager);
 
             InitBindings();
+
+            _iconManager = new IconManager(_lCUConnection.CurrentSummonerName);
+            _lCUConnection.IconManager = _iconManager;
 
             DrawList();
 
